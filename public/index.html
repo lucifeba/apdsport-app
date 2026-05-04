@@ -1,18 +1,1141 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0A0A0A" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="APD Sport" />
-  <meta name="description" content="APD Sport — Entrenamiento y Nutrición Deportiva Personalizada" />
-  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/icon-192.png" />
-  <title>APD Sport</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APD SPORT â Plataforma de Entrenamiento</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.js"></script>
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --bg2: #111111;
+      --card: #161616;
+      --card2: #1E1E1E;
+      --border: #2A2A2A;
+      --orange: #F97316;
+      --orange2: #EA6A0A;
+      --orange-dim: rgba(249,115,22,0.15);
+      --white: #FFFFFF;
+      --gray: #888888;
+      --gray2: #555555;
+      --green: #22C55E;
+      --red: #EF4444;
+      --blue: #3B82F6;
+      --text: #F1F1F1;
+      --text2: #AAAAAA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px; min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .main { margin-left: 240px; flex: 1; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-text {
+      font-size: 22px; font-weight: 900; letter-spacing: -0.5px;
+      color: var(--white);
+    }
+    .logo-text span { color: var(--orange); }
+    .logo-sub { font-size: 10px; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .nav-section { padding: 12px 12px 0; }
+    .nav-label { font-size: 10px; color: var(--gray2); letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 8px 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      color: var(--gray); font-size: 14px; font-weight: 500;
+      transition: all 0.15s; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--card); color: var(--text); }
+    .nav-item.active { background: var(--orange-dim); color: var(--orange); }
+    .nav-item svg { flex-shrink: 0; }
+    .sidebar-footer {
+      margin-top: auto; padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .version-badge {
+      font-size: 11px; color: var(--gray2);
+      text-align: center;
+    }
+
+    /* Page */
+    .page { padding: 32px 36px; max-width: 1200px; }
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-size: 28px; font-weight: 800; color: var(--white); }
+    .page-sub { font-size: 14px; color: var(--gray); margin-top: 4px; }
+
+    /* Cards */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+    }
+    .card-title { font-size: 13px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+    /* Stat cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+    }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--white); }
+    .stat-label { font-size: 13px; color: var(--gray); margin-top: 2px; }
+    .stat-delta { font-size: 12px; color: var(--green); margin-top: 4px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 18px; border-radius: 8px; font-size: 14px;
+      font-weight: 600; cursor: pointer; border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--orange); color: #fff; }
+    .btn-primary:hover { background: var(--orange2); }
+    .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-ghost { background: transparent; color: var(--gray); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--gray2); }
+    .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn-success { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-xs { padding: 4px 10px; font-size: 12px; }
+    .btn-icon { padding: 8px; border-radius: 8px; }
+
+    /* Inputs */
+    input, select, textarea {
+      background: var(--card2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 10px 12px;
+      font-size: 14px; width: 100%;
+      transition: border-color 0.15s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--orange); }
+    input::placeholder { color: var(--gray2); }
+    select option { background: var(--card2); }
+    label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 5px; }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Tags / Badges */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-orange { background: var(--orange-dim); color: var(--orange); }
+    .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .badge-gray { background: var(--card2); color: var(--gray); }
+
+    /* Muscle group pill */
+    .muscle-pill {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      border: 1px solid transparent; transition: all 0.15s;
+      background: var(--card2); color: var(--gray);
+    }
+    .muscle-pill:hover { border-color: var(--orange); color: var(--orange); }
+    .muscle-pill.active { background: var(--orange-dim); color: var(--orange); border-color: var(--orange); }
+
+    /* Exercise card */
+    .exercise-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .exercise-card:hover { border-color: var(--orange); background: var(--card2); }
+    .exercise-card.selected { border-color: var(--orange); background: var(--orange-dim); }
+    .exercise-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--card2); display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .exercise-info { flex: 1; min-width: 0; }
+    .exercise-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .exercise-meta { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .exercises-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+
+    /* Workout card */
+    .workout-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .workout-card:hover { border-color: var(--orange); }
+    .workout-card-name { font-size: 16px; font-weight: 700; color: var(--white); }
+    .workout-card-meta { font-size: 13px; color: var(--gray); margin-top: 6px; }
+    .workout-exercises-preview { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .workouts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+
+    /* Session */
+    .session-exercise {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .session-exercise-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .session-exercise-name { font-size: 15px; font-weight: 700; color: var(--white); }
+    .sets-table { width: 100%; border-collapse: collapse; }
+    .sets-table th { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px 8px; text-align: left; }
+    .sets-table td { padding: 6px 8px; }
+    .sets-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+    .set-input { width: 80px; text-align: center; padding: 7px 8px; }
+    .set-number { font-size: 13px; color: var(--gray); font-weight: 600; }
+    .set-done { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: var(--card2); }
+    .set-done.done { background: rgba(34,197,94,0.2); }
+
+    /* Timer */
+    .timer-bar {
+      position: fixed; top: 0; left: 240px; right: 0;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 12px 36px; display: flex; align-items: center; justify-content: space-between;
+      z-index: 50;
+    }
+    .timer-text { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--orange); }
+    .timer-label { font-size: 12px; color: var(--gray); }
+
+    /* Progress */
+    .chart-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+    }
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; padding: 20px;
+    }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; width: 100%;
+      max-width: 560px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--white); margin-bottom: 20px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 18px;
+      font-size: 14px; color: var(--text);
+      z-index: 300; animation: slideUp 0.2s ease;
+      display: flex; align-items: center; gap: 10px;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* History list */
+    .history-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .history-date { font-size: 12px; color: var(--gray); min-width: 80px; }
+    .history-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .history-stats { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .history-volume { font-size: 20px; font-weight: 800; color: var(--orange); min-width: 80px; text-align: right; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--gray);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state-title { font-size: 18px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+    .empty-state p { font-size: 14px; max-width: 300px; margin: 0 auto 20px; }
+
+    /* Search bar */
+    .search-bar { position: relative; }
+    .search-bar input { padding-left: 36px; }
+    .search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gray); }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo, .nav-label, .nav-item span, .logo-sub, .sidebar-footer { display: none; }
+      .nav-item { justify-content: center; padding: 12px; }
+      .main { margin-left: 60px; }
+      .timer-bar { left: 60px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid { grid-template-columns: 1fr; }
+      .page { padding: 20px 16px; }
+    }
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="root"></div>
+<script>
+const { useState, useEffect, useRef, useCallback } = React;
+const { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } = Recharts;
+
+// âââ DATA âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const MUSCLE_GROUPS = ['Todos','Pecho','Espalda','Piernas','Hombros','BÃ­ceps','TrÃ­ceps','Core','Cardio'];
+
+const EXERCISES = [
+  // PECHO
+  {id:'e1', name:'Press Banca Plano', muscle:'Pecho', secondary:'TrÃ­ceps, Hombros', equipment:'Barra', icon:'ðï¸', type:'Fuerza'},
+  {id:'e2', name:'Press Banca Inclinado', muscle:'Pecho', secondary:'Hombros', equipment:'Barra/Mancuernas', icon:'ðï¸', type:'Fuerza'},
+  {id:'e3', name:'Aperturas con Mancuernas', muscle:'Pecho', secondary:'Hombros', equipment:'Mancuernas', icon:'ðª', type:'Fuerza'},
+  {id:'e4', name:'Fondos en Paralelas', muscle:'Pecho', secondary:'TrÃ­ceps', equipment:'Paralelas', icon:'ð¤¸', type:'Fuerza'},
+  {id:'e5', name:'Press con Mancuernas Plano', muscle:'Pecho', secondary:'TrÃ­ceps', equipment:'Mancuernas', icon:'ðª', type:'Fuerza'},
+  {id:'e6', name:'Cruce de Poleas Alto', muscle:'Pecho', secondary:'Hombros', equipment:'Poleas', icon:'ð', type:'Fuerza'},
+  // ESPALDA
+  {id:'e7', name:'Dominadas', muscle:'Espalda', secondary:'BÃ­ceps', equipment:'Barra', icon:'ð', type:'Fuerza'},
+  {id:'e8', name:'Remo con Barra', muscle:'Espalda', secondary:'BÃ­ceps', equipment:'Barra', icon:'ðï¸', type:'Fuerza'},
+  {id:'e9', name:'Remo con Mancuerna', muscle:'Espalda', secondary:'BÃ­ceps', equipment:'Mancuerna', icon:'ðª', type:'Fuerza'},
+  {id:'e10', name:'JalÃ³n Polea al Pecho', muscle:'Espalda', secondary:'BÃ­ceps', equipment:'Polea', icon:'ð', type:'Fuerza'},
+  {id:'e11', name:'Peso Muerto', muscle:'Espalda', secondary:'Piernas, Core', equipment:'Barra', icon:'ðï¸', type:'Fuerza'},
+  {id:'e12', name:'Pull-over con Mancuerna', muscle:'Espalda', secondary:'Pecho', equipment:'Mancuerna', icon:'ðª', type:'Fuerza'},
+  // PIERNAS
+  {id:'e13', name:'Sentadilla con Barra', muscle:'Piernas', secondary:'Core, GlÃºteos', equipment:'Barra', icon:'ð¦µ', type:'Fuerza'},
+  {id:'e14', name:'Prensa de Piernas', muscle:'Piernas', secondary:'GlÃºteos', equipment:'MÃ¡quina', icon:'ð©', type:'Fuerza'},
+  {id:'e15', name:'Zancadas', muscle:'Piernas', secondary:'GlÃºteos', equipment:'Mancuernas', icon:'ð¶', type:'Fuerza'},
+  {id:'e16', name:'Curl Femoral Tumbado', muscle:'Piernas', secondary:'', equipment:'MÃ¡quina', icon:'ð©', type:'Fuerza'},
+  {id:'e17', name:'ExtensiÃ³n de CuÃ¡driceps',
+uscle:'Piernas', secondary:'', equipment:'MÃ¡quina', icon:'ð©', type:'Fuerza'},
+  {id:'e18', name:'Peso Muerto Rumano', muscle:'Piernas', secondary:'Espalda baja', equipment:'Barra', icon:'ðï¸', type:'Fuerza'},
+  {id:'e19', name:'Sentadilla BÃºlgara', muscle:'Piernas', secondary:'GlÃºteos', equipment:'Mancuernas', icon:'ð¦µ', type:'Fuerza'},
+  {id:'e20', name:'Gemelo de Pie', muscle:'Piernas', secondary:'', equipment:'MÃ¡quina', icon:'ð©', type:'Fuerza'},
+  // HOMBROS
+  {id:'e21', name:'Press Militar con Barra', muscle:'Hombros', secondary:'TrÃ­ceps', equipment:'Barra', icon:'ðï¸', type:'Fuerza'},
+  {id:'e22', name:'Elevaciones Laterales', muscle:'Hombros', secondary:'', equipment:'Mancuernas', icon:'ðª', type:'Fuerza'},
+  {id:'e23', name:'Press Arnold', muscle:'Hombros', secondary:'TrÃ­ceps', equipment:'Mancuernas', icon:'ðª', type:'Fuerza'},
+  {id:'e24', name:'PÃ¡jaros en InclinaciÃ³n', muscle:'Hombros', secondary:'', equipment:'Mancuernas', icon:'ðª', type:'Fuerza'},
+  {id:'e25', name:'Face Pulls', muscle:'Hombros', secondary:'Manguito rotador', equipment:'Polea', icon:'ð', type:'Fuerza'},
+  // BÃCEPS
+  {id:'e26', name:'Curl BÃ­ceps con Barra', muscle:'BÃ­ceps', secondary:'', equipment:'Barra', icon:'ðª', type:'Fuerza'},
+  {id:'e27', name:'Curl Martillo', muscle:'BÃ­ceps', secondary:'Antebrazo', equipment:'Mancuernas', icon:'ðª', type:'Fuerza'},
+  {id:'e28', name:'Curl Concentrado', muscle:'BÃ­ceps', secondary:'', equipment:'Mancuerna', icon:'ðª', type:'Fuerza'},
+  {id:'e29', name:'Curl en Polea Baja', muscle:'BÃ­ceps', secondary:'', equipment:'Polea', icon:'ð', type:'Fuerza'},
+  {id:'e30', name:'Curl Predicador', muscle:'BÃ­ceps', secondary:'', equipment:'Barra/MÃ¡quina', icon:'ð©', type:'Fuerza'},
+  // TRÃCEPS
+  {id:'e31', name:'Press FrancÃ©s', muscle:'TrÃ­ceps', secondary:'', equipment:'Barra EZ', icon:'ðï¸', type:'Fuerza'},
+  {id:'e32', name:'ExtensiÃ³n en Polea Alta', muscle:'TrÃ­ceps', secondary:'', equipment:'Polea', icon:'ð', type:'Fuerza'},
+  {id:'e33', name:'Fondos en Banco', muscle:'TrÃ­ceps', secondary:'', equipment:'Banco', icon:'ð¤¸', type:'Fuerza'},
+  {id:'e34', name:'Kickback', muscle:'TrÃ­ceps', secondary:'', equipment:'Mancuerna', icon:'ðª', type:'Fuerza'},
+  {id:'e35', name:'Press Cerrado', muscle:'TrÃ­ceps', secondary:'Pecho', equipment:'Barra', icon:'ðï¸', type:'Fuerza'},
+  // CORE
+  {id:'e36', name:'Plancha IsotnÃ©n¸ìµÕÍ±è
+½É°Í½¹Éäè°ÅÕ¥Áµ¹ÐèM¥¸µÑÉ¥°°¥½¸èÂ~Ä°ÑåÁèÕÉéô°(í¥èÌÜ°¹µè
+ÉÕ¹ ½µ¥¹°°µÕÍ±è
+½É°Í½¹Éäè°ÅÕ¥Áµ¹ÐèM¥¸µÑÉ¥°°¥½¸èÂ~à°ÑåÁèÕÉéô°(í¥èÌà°¹µèIÕ½µ¥¹°°µÕÍ±è
+½É°Í½¹Éäè°ÅÕ¥Áµ¹ÐèIÕ°¥½¸èjg¾â<°ÑåÁèÕÉéô°(í¥èÌä°¹µè±Ù§Í¸A¥É¹ÌQÕµ¼°µÕÍ±è
+½É°Í½¹Éäè°ÅÕ¥Áµ¹ÐèM¥¸µÑÉ¥°°¥½¸èÂ~à°ÑåÁèÕÉéô°(í¥èÐÀ°¹µèIÕÍÍ¥¸QÝ¥ÍÐ°µÕÍ±è
+½É°Í½¹Éäè°ÅÕ¥Áµ¹ÐèM¥¸µÑÉ¥°½¥Í¼°¥½¸èÂ~R°ÑåÁèÕÉéô°(í¥èÐÄ°¹µèA±¹¡1ÑÉ°°µÕÍ±è
+½É°Í½¹Éäè°ÅÕ¥Áµ¹ÐèM¥¸µÑÉ¥°°¥½¸èÂ~Ä°ÑåÁèÕÉéô°(¼¼
+I%<(í¥èÐÈ°¹µè
+ÉÉÉ¸
+¥¹Ñ°µÕÍ±è
+É¥¼°Í½¹ÉäèA¥É¹Ì°ÅÕ¥Áµ¹Ðè
+¥¹Ñ°¥½¸èÂ~>°ÑåÁè
+É¥¼ô°(í¥èÐÌ°¹µè	¥¥±ÑÍÓÑ¥°µÕÍ±è
+É¥¼°Í½¹ÉäèA¥É¹Ì°ÅÕ¥Áµ¹Ðè	¥¤°¥½¸èÂ~jÐ°ÑåÁè
+É¥¼ô°(í¥èÐÐ°¹µèM±ÑÈ±
+½µ°µÕÍ±è
+É¥¼°Í½¹ÉäèA¥É¹Ì°ÅÕ¥Áµ¹Ðè
+½µ°¥½¸èÂ~ª°ÑåÁè
+É¥¼ô°(í¥èÐÔ°¹µèIµ¼¸7ÅÕ¥¹°µÕÍ±è
+É¥¼°Í½¹ÉäèÍÁ±°A¥É¹Ì°ÅÕ¥Áµ¹Ðè7ÅÕ¥¹°¥½¸èÂ~j°ÑåÁè
+É¥¼ô°(í¥èÐØ°¹µè!%%P¸
+¥¹Ñ°µÕÍ±è
+É¥¼°Í½¹Éäè°ÅÕ¥Áµ¹Ðè
+¥¹Ñ°¥½¸èj°ÑåÁè
+É¥¼ô°(í¥èÐÜ°¹µè	ÕÉÁÌ°µÕÍ±è
+É¥¼°Í½¹ÉäèÕ±°	½ä°ÅÕ¥Áµ¹ÐèM¥¸µÑÉ¥°°¥½¸èÂ~à°ÑåÁè
+É¥¼ô°)tì()½¹ÍÐ%9%Q%1}]=I-=UQLôl(ì(¥èÜÄ°¹µèµÁÕ©PÕÉé°ÍÉ¥ÁÑ¥½¸èA¡¼°!½µÉ½ÌäQËµÁÌ²(!½±½ÈèäÜÌÄØ°(áÉ¥ÍÌèlÄ°È°ÈÄ°ÈÈ°ÌÄ°ÌÈt(ô°(ì(¥èÜÈ°¹µèQ¥ËÍ¸P!¥ÁÉÑÉ½¥°ÍÉ¥ÁÑ¥½¸èÍÁ±äµÁÌ°½±½ÈèÍàÉØ°(áÉ¥ÍÌèlÜ°à°ÄÀ°ÈØ°ÈÜ°Èàt(ô°(ì(¥èÜÌ°¹µèA¥É¹ÌRP
+½µÁ±Ñ¼°ÍÉ¥ÁÑ¥½¸è
+×É¥ÁÌ°µ½É°ä³éÑ½Ì°½±½ÈèÈÉÔÕ°(áÉ¥ÍÌèlÄÌ°ÄÐ°ÄÔ°ÄØ°ÄÜ°ÈÀt(ô°(ì(¥èÜÐ°¹µè
+½É¬
+É¥¼°ÍÉ¥ÁÑ¥½¸è½µ¸ä½¹¥¥½¹µ¥¹Ñ¼°½±½ÈèàÔÕÜ°(áÉ¥ÍÌèlÌØ°ÌÜ°Ìà°Ìä°ÐÈ°ÐÐt(ô)tì((¼¼RRR MQ=IRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR )Õ¹Ñ¥½¸±½¡­ä°¤ìÑÉäìÉÑÕÉ¸)M=8¹ÁÉÍ¡±½±MÑ½É¹Ñ%Ñ´¡­ä¤¤ñðìôÑ ìÉÑÕÉ¸ìôô)Õ¹Ñ¥½¸ÍÙ¡­ä°Ù°¤ì±½±MÑ½É¹ÍÑ%Ñ´¡­ä°)M=8¹ÍÑÉ¥¹¥ä¡Ù°¤¤ìô((¼¼RRR %
+=9LRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR )½¹ÍÐ%½¸ô¡ì¹µ°Í¥éôÄà°½±½ÈôÕÉÉ¹Ñ
+½±½Èô¤ôøì(½¹ÍÐ¥½¹Ìôì(¡½µèñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñÁÑ ô4Ìå°ä´ÜäÝØÄÅÈÈÀÀÄ´ÈÉ ÕÈÈÀÀÄ´È´Éè¼øñÁ½±å±¥¹Á½¥¹ÑÌôäÈÈäÄÈÄÔÄÈÄÔÈÈ¼øð½ÍÙø°(Õµ±°èñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñÁÑ ô4ØÑØÄÙ4ÄàÑØÄÙ4ØÄÉ ÄÉ4ÈÝ Ñ4ÄàÝ Ñ4ÈÄÝ Ñ4ÄàÄÝ Ð¼øð½ÍÙø°(±¥ÍÐèñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñÁÑ ô4äÕ ÝÈÈÀÀÀ´ÈÉØÄÉÈÈÀÀÀÈÉ ÄÁÈÈÀÀÀÈ´ÉXÝÈÈÀÀÀ´È´É ´É4äÕÈÈÀÀÀÈÉ ÉÈÈÀÀÀÈ´É4äÕÈÈÀÀÄÈ´É ÉÈÈÀÀÄÈÈ¼øñ±¥¹àÄôääÄôÄÈàÈôÄÔäÈôÄÈ¼øñ±¥¹àÄôääÄôÄØàÈôÄÌäÈôÄØ¼øð½ÍÙø°(Á±äèñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñ¥É±àôÄÈäôÄÈÈôÄÀ¼øñÁ½±å½¸Á½¥¹ÑÌôÄÀàÄØÄÈÄÀÄØÄÀà¼øð½ÍÙø°(¡ÉÐèñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñÁ½±å±¥¹Á½¥¹ÑÌôÈÈÄÈÄàÄÈÄÔÈÄäÌØÄÈÈÄÈ¼øð½ÍÙø°(Á±ÕÌèñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñ±¥¹àÄôÄÈäÄôÔàÈôÄÈäÈôÄä¼øñ±¥¹àÄôÔäÄôÄÈàÈôÄääÈôÄÈ¼øð½ÍÙø°(ÑÉÍ èñÍÙÝ¥Ñ õíÍ¥éô¡¥¡ÐõíÍ¥éô¥±°ô¹½¹ÍÑÉ½­õí½±½ÉôÍÑÉ½­]¥Ñ ôÈÙ¥Ý	½àôÀÀÈÐÈÐøñÁ½±å±¥¹Á½¥¹ÑÌôÌØÔØÈÄØ¼øñÁÑ ô4ÄäÙØÄÑÈÈÀÀÄ´ÈÉ ÝÈÈÀÀÄ´È´ÉXÙ´ÌÁXÑÄÄÀÀÄÄ´Å ÑÄÄÀÀÄÄÅØÈ¼ÏÜÝÏÙX\ÚÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞHÚ\ÛHÞHLHÞOHLHHÏ[HOHHLOHHHMHLHMHÏÜÝÏÛÜÙNÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞH[HOHNLOHHLHNÏ[HOHLOHHNLHNÏÜÝÏÚXÚÎÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHHY]ÐÞHÛ[[HÚ[ÏH
+HMÈ
+LÏÜÝÏ\NÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞH]HLLÌMH
+KMHLMH
+HLÌMÈ
+ÈLLÏ]HLLLÌLLËXL
+ÌMMLLLLÏÜÝÏÝ\ÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞHÛYÛÛÚ[ÏHLMKHKÈMÈMMNNKLMËÍÈ
+KK
+ÈMMKÈLHLÏÜÝÏXÚÎÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞH[HOHNHLOHLHHLHLÏÛ[[HÚ[ÏHLNH
+HLL
+HÏÜÝÏY]ÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞH]HLLH
+
+LLMLMLLMÈÏ]HLNHXLLHLHLÈÓLM[MHKMKKNK^ÏÜÝÏÜNÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞH]HNZLL]MMÒØLHHLH]ØMH
+H
+H
+Z[MXMH
+H
+KMULHHLKLZLÓMÚLÏ]HLLMXMH
+HKMKMUÈÏ]HLLMXMH
+H
+KMUÈÏÜÝÏÛØÚÎÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞHÚ\ÛHÞHLÞOHLHLÏÛ[[HÚ[ÏHL
+LLMMÏÜÝÏÙZYÚÝÈÚY^ÜÚ^_HZYÚ^ÜÚ^_H[HÛHÝÚÙO^ØÛÛÜHÝÚÙUÚYHY]ÐÞHÚ\ÛHÞHLÞOHLHÈÏ]HM
+NLMËMËLLLLLLLLÏÜÝÏNÂ]\XÛÛÖÛ[YWH[ÂNÂËÈ8¥ 8¥ 8¥ ÐTÕ8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛØ\Ý
+È\ÙËÛÛÜÙHJHÂ\ÙQYXÝ
+
+
+HOÈÛÛÝHÙ][Y[Ý]
+ÛÛÜÙKL
+NÈ]\
+
+HOÛX\[Y[Ý]
+
+NÈK×JNÂ]\]Û\ÜÓ[YOHØ\ÝÜ[¸§!OÜÜ[Û\ÙßOÙ]ÂBËÈ8¥ 8¥ 8¥ ÒQPT8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[ÛÚYX\ÈYÙKÙ]YÙKXÝ]TÙ\ÜÚ[ÛJHÂÛÛÝ]HÂÈYÙ\ÚØ\	ËXÛÛÚÛYIËX[Ñ\ÚØ\	ÈKÈYÙ^\Ú\Ù\ÉËXÛÛÙ[X[	ËX[ÑZ\ÚXÚ[ÜÉÈKÈYÝÛÜÛÝ]ÉËXÛÛÛ\Ý	ËX[ÓZ\È][\ÉÈKÈYÜÙ\ÜÚ[ÛËXÛÛÜ^IËX[Ñ[[\ËYÙNXÝ]TÙ\ÜÚ[ÛKÈYÜÙÜ\ÜÉËXÛÛØÚ\	ËX[ÔÙÜ\ÛÉÈKNÂ]\
+]Û\ÜÓ[YOHÚYX\]Û\ÜÓ[YOHÚYX\[ÙÛÈ]Û\ÜÓ[YOHÙÛË]^TÜ[ÔÔÜÜ[Ù]]Û\ÜÓ[YOHÙÛË\ÝXZ[[È]ÜOÙ]Ù]]Û\ÜÓ[YOH]\ÙXÝ[ÛÝ[O^ÞÙ^__O]Û\ÜÓ[YOH][X[Y[°îÙ]Û]X\
+O
+]Ù^O^ÛYHÛ\ÜÓ[YO^Ø]Z][H	ÜYÙOOO[YÉØXÝ]IÎÉßXHÛÛXÚÏ^Ê
+HOÙ]YÙJY
+_OXÛÛ[YO^ÛXÛÛHÚ^O^ÌMßHÏÜ[ÛX[OÜÜ[ÛYÙH	Ü[Ý[O^ÞÛX\Ú[YØ]]ÉËÚYZYÚÜ\Y]\ÎÍL	IËXÚÙÜÝ[Ý\K[Ü[ÙJIß_KÏBÙ]
+J_BÙ]]Û\ÜÓ[YOHÚYX\YÛÝ\]Û\ÜÓ[YOH\Ú[ÛXYÙHTÔÔKÙ]Ù]Ù]
+NÂBËÈ8¥ 8¥ 8¥ TÒÐT8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ 8¥ [Ý[Û\ÚØ\
+È\ÝÜKÛÜÛÝ]ËÙ]YÙHJHÂÛÛÝÝ[Ù\ÜÚ[ÛÈH\ÝÜK[ÝÂÛÛÝÝ[Û[YHH\ÝÜKYXÙJ
+Ë
+HOÈ
+È
+Ý[Û[Y_
+K
+NÂÛÛÝÝ[^\Ú\Ù\ÈH\ÝÜKYXÙJ
+Ë
+HOÈ
+È
+^\Ú\Ù\ÏË[Ý
+K
+NÂÛÛÝÝXZÈHØ[ÔÝXZÊ\ÝÜJNÂÛÛÝXÙ[HË\ÝÜWK]\ÙJ
+KÛXÙJ
+JNÂÛÛÝÙYZÑ]HHÙ]ÙYZÑ]J\ÝÜJNÂ]\
+]Û\ÜÓ[YOHYÙH]Û\ÜÓ[YOHYÙKZXY\]Ý[O^ÞÙ\Ü^NÙ^	Ë\ÝYPÛÛ[ÜÜXÙKX]ÙY[Ë[YÛ][\ÎÙ^\Ý\	ß_O]]Û\ÜÓ[YOHYÙK]]H°¨PY[[YÈHY[HH<'äªÙ]]Û\ÜÓ[YOHYÙK\ÝXTÔÔ8 %]YÜXHH[[[ZY[È\ÛÛ[Ù]Ù]]ÛÛ\ÜÓ[YOH\[X\HÛÛXÚÏ^Ê
+HOÙ]YÙJ	ÝÛÜÛÝ]ÉÊ_OXÛÛ[YOH^HÚ^O^ÌM_HÏ[XÚX\[[ÂØ]ÛÙ]Ù]]Û\ÜÓ[YOHÝ]ËYÜY]Û\ÜÓ[YOHÝ]XØ\]Û\ÜÓ[YOHÝ]ZXÛÛÝ[O^ÞØXÚÙÜÝ[ÜØJKLMKMJIß_OXÛÛ[YOH\HÚ^O^ÌHÛÛÜH\K[Ü[ÙJHÏÙ]]Û\ÜÓ[YOHÝ]][YHÜÝXZßOÙ]]Û\ÜÓ[YOHÝ][X[0ëX\ÈHXÚOÙ]]Û\ÜÓ[YOHÝ]Y[H¼'å)HÚYÝYH\ðëOÙ]Ù]]Û\ÜÓ[YOHÝ]XØ\]Û\ÜÓ[YOHÝ]ZXÛÛÝ[O^ÞØXÚÙÜÝ[ÜØJ
+NKLÌ
+MJIß_OXÛÛ[YOHÜHÚ^O^ÌHÛÛÜH\KXYJHÏÙ]]Û\ÜÓ[YOHÝ]][YHÝÝ[Ù\ÜÚ[ÛßOÙ]]Û\ÜÓ[YOHÝ][X[Ù\Ú[Û\ÈÝ[\ÏÙ]Ù]]Û\ÜÓ[YOHÝ]XØ\]Û\ÜÓ[YOHÝ]ZXÛÛÝ[O^ÞØXÚÙÜÝ[ÜØJÍNMËMMJIß_OXÛÛ[YOHÙZYÚÚ^O^ÌHÛÛÜH\KYÜY[HÏÙ]]Û\ÜÓ[YOHÝ]][YHÝÝ[Û[YHHLÈ
+Ý[Û[YKÌL
+KÑ^Y
+JJÉÝ	ÈÝ[Û[YJÉÚÙÉßOÙ]]Û\ÜÓ[YOHÝ][X[Û[Y[Ý[Ù]Ù]]Û\ÜÓ[YOHÝ]XØ\]Û\ÜÓ[YOHÝ]ZXÛÛÝ[O^ÞØXÚÙÜÝ[ÜØJM
+K
+ËMJIß_OXÛÛ[YOH[X[Ú^O^ÌHÛÛÜHÐN
+MQÈÏÙ]]Û\ÜÓ[YOHÝ]][YHÝÛÜÛÝ]Ë[ÝOÙ]]Û\ÜÓ[YOHÝ][X[][\ÈÜXY\ÏÙ]Ù]Ù]]Ý[O^ÞÙ\Ü^NÙÜY	ËÜY[\]PÛÛ[[Îß1fr 1fr', gap:20, marginBottom:24}}>
+        <div className="chart-card">
+          <div className="card-title">Sesiones esta semana</div>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={weekData} barSize={20}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false}/>
+              <XAxis dataKey="day" tick={{fill:'#888',fontSize:12}} axisLine={false} tickLine={false}/>
+              <YAxis tick={{fill:'#888',fontSize:11}} axisLine={false} tickLine={false} allowDecimals={false}/>
+              <Tooltip contentStyle={{background:'#1E1E1E',border:'1px solid #2A2A2A',borderRadius:8,color:'#fff'}} cursor={{fill:'rgba(249,115,22,0.1)'}}/>
+              <Bar dataKey="sesiones" fill="#F97316" radius={[4,4,0,0]}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="chart-card">
+          <div className="card-title">Rutinas disponibles</div>
+          {workouts.slice(0,4).map(w => (
+            <div key={w.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:w.color,flexShrink:0}}/>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:600,color:'var(--text)'}}>{w.name}</div>
+                <div style={{fontSize:11,color:'var(--gray)'}}>{w.exercises.length} ejercicios</div>
+              </div>
+              <button className="btn btn-xs btn-primary" onClick={() => setPage('workouts')}>Iniciar</button>
+            </div>
+          ))}
+          {workouts.length === 0 && <div style={{fontSize:13,color:'var(--gray)',padding:'20px 0',textAlign:'center'}}>Crea tu primera rutina</div>}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title" style={{marginBottom:12}}>Historial reciente</div>
+        {recent.length === 0 ? (
+          <div style={{textAlign:'center',padding:'20px',color:'var(--gray)',fontSize:13}}>
+            No hay sesiones registradas aÃºn. Â¡Empieza a entrenar!
+          </div>
+        ) : recent.map(h => (
+          <div key={h.id} className="history-item">
+            <div>
+              <div style={{fontSize:11,color:'var(--orange)',fontWeight:600}}>{new Date(h.date).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})}</div>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--text)',marginTop:2}}>{h.workoutName}</div>
+              <div style={{fontSize:12,color:'var(--gray)',marginTop:1}}>{h.exercises?.length} ejercicios Â· {formatDuration(h.duration)}</div>
+            </div>
+            <div style={{marginLeft:'auto',textAlign:'right'}}>
+              <div style={{fontSize:18,fontWeight:800,color:'var(--orange)'}}>{h.totalVolume}kg</div>
+              <div style={{fontSize:11,color:'var(--gray)'}}>volumen</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// âââ EXERCISES ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function Exercises() {
+  const [filter, setFilter] = useState('Todos');
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(null);
+
+  const filtered = EXERCISES.filter(e =>
+    (filter === 'Todos' || e.muscle === filter) &&
+    (e.name.toLowerCase().includes(search.toLowerCase()) || e.muscle.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div className="page-title">Base de Ejercicios</div>
+        <div className="page-sub">{EXERCISES.length} ejercicios Â· Filtrados: {filtered.length}</div>
+      </div>
+
+      <div className="search-bar" style={{marginBottom:14}}>
+        <Icon name="search" size={15} color="var(--gray)"/>
+        <input placeholder="Buscar ejercicio..." value={search} onChange={e=>setSearch(e.target.value)}/>
+      </div>
+
+      <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:16}}>
+        {MUSCLE_GROUPS.map(g => (
+          <span key={g} className={`muscle-pill ${filter===g?'active':''}`} onClick={() => setFilter(g)}>{g}</span>
+        ))}
+      </div>
+
+      <div className="exercises-grid">
+        {filtered.map(ex => (
+          <div key={ex.id} className={`exercise-card ${selected?.id===ex.id?'selected':''}`} onClick={() => setSelected(selected?.id===ex.id?null:ex)}>
+            <div className="exercise-icon">{ex.icon}</div>
+            <div className="exercise-info">
+              <div className="exercise-name">{ex.name}</div>
+              <div className="exercise-meta">{ex.muscle} Â· {ex.equipment}</div>
+              {ex.secondary && <div className="exercise-meta" style={{color:'var(--gray2)'}}>Secundario: {ex.secondary}</div>}
+            </div>
+            <span className={`badge ${ex.type==='Cardio'?'badge-blue':'badge-orange'}`}>{ex.type}</span>
+          </div>
+        ))}
+      </div>
+
+      {selected && (
+        <div className="modal-overlay" onClick={() => setSelected(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
+              <div>
+                <div style={{fontSize:10,color:'var(--orange)',letterSpacing:1,textTransform:'uppercase',marginBottom:4}}>{selected.muscle}</div>
+                <div style={{fontSize:22,fontWeight:800,color:'var(--white)'}}>{selected.name}</div>
+              </div>
+              <button className="btn btn-icon btn-ghost" onClick={() => setSelected(null)}><Icon name="close" size={16}/></button>
+            </div>
+            <div style={{fontSize:60,textAlign:'center',padding:'16px 0'}}>{selected.icon}</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:12}}>
+              {[['Grupo muscular', selected.muscle], ['Secundario', selected.secondary||'â'], ['Material', selected.equipment], ['Tipo', selected.type]].map(([k,v]) => (
+                <div key={k} style={{background:'var(--card2)',borderRadius:8,padding:'12px 14px'}}>
+                  <div style={{fontSize:11,color:'var(--gray)',marginBottom:2}}>{k}</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'var(--text)'}}>{v}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{marginTop:20,background:'var(--card2)',borderRadius:10,padding:16}}>
+              <div style={{fontSize:12,color:'var(--gray)',marginBottom:6}}>ð¡ Consejo APD SPORT</div>
+              <div style={{fontSize:13,color:'var(--text2)',lineHeight:1.6}}>
+                MantÃ©n la tÃ©cnica correcta en todo momento. Comienza con un peso que te permita completar el rango completo de movimiento. Progresa de forma gradual y controlada.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// âââ WORKOUTS âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function Workouts({ workouts, setWorkouts, setPage, setActiveWorkout }) {
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ name:'', description:'', color:'#F97316', exercises:[] });
+  const [exSearch, setExSearch] = useState('');
+  const [exFilter, setExFilter] = useState('Todos');
+  const [toast, setToast] = useState('');
+
+  function openNew() {
+    setEditing(null);
+    setForm({ name:'', description:'', color:'#F97316', exercises:[] });
+    setShowModal(true);
+  }
+  function openEdit(w) {
+    setEditing(w.id);
+    setForm({ name:w.name, description:w.description, color:w.color, exercises:[...w.exercises] });
+    setShowModal(true);
+  }
+  function saveWorkout() {
+    if (!form.name.trim()) return;
+    if (editing) {
+      const updated = workouts.map(w => w.id===editing ? {...w,...form} : w);
+      setWorkouts(updated);
+      save('workouts', updated);
+    } else {
+      const nw = [...workouts, { ...form, id: 'w'+Date.now() }];
+      setWorkouts(nw);
+      save('workouts', nw);
+    }
+    setShowModal(false);
+    setToast(editing ? 'Rutina actualizada â' : 'Rutina creada â');
+  }
+  function deleteWorkout(id) {
+    const updated = workouts.filter(w => w.id !== id);
+    setWorkouts(updated);
+    save('workouts', updated);
+  }
+  function toggleEx(id) {
+    setForm(f => ({
+      ...f,
+      exercises: f.exercises.includes(id) ? f.exercises.filter(e=>e!==id) : [...f.exercises, id]
+    }));
+  }
+  function startWorkout(w) {
+    setActiveWorkout(w);
+    setPage('session');
+  }
+
+  const filtEx = EXERCISES.filter(e =>
+    (exFilter==='Todos'||e.muscle===exFilter) &&
+    e.name.toLowerCase().includes(exSearch.toLowerCase())
+  );
+
+  const COLORS = ['#F97316','#3B82F6','#22C55E','#A855F7','#EC4899','#EAB308'];
+
+  return (
+    <div className="page">
+      {toast && <Toast msg={toast} onClose={() => setToast('')}/>}
+      <div className="page-header">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+          <div>
+            <div className="page-title">Mis Rutinas</div>
+            <div className="page-sub">{workouts.length} rutinas guardadas</div>
+          </div>
+          <button className="btn btn-primary" onClick={openNew}><Icon name="plus" size={15}/>Nueva Rutina</button>
+        </div>
+      </div>
+
+      {workouts.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">ð</div>
+          <div className="empty-state-title">Sin rutinas todavÃ­a</div>
+          <p>Crea tu primera rutina personalizada con los ejercicios que quieras.</p>
+          <button className="btn btn-primary" onClick={openNew}><Icon name="plus" size={15}/>Crear Rutina</button>
+        </div>
+      ) : (
+        <div className="workouts-grid">
+          {workouts.map(w => {
+            const exs = w.exercises.map(id => EXERCISES.find(e=>e.id===id)).filter(Boolean);
+            return (
+              <div key={w.id} className="workout-card">
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                  <div style={{width:4,height:'100%',background:w.color,borderRadius:4,alignSelf:'stretch',marginRight:4,marginLeft:-4}}/>
+                  <div style={{flex:1}}>
+                    <div className="workout-card-name">{w.name}</div>
+                    <div className="workout-card-meta">{w.description}</div>
+                  </div>
+                </div>
+                <div className="workout-exercises-preview">
+                  {exs.slice(0,5).map(e => <span key={e.id} className="badge badge-gray">{e.icon} {e.name}</span>)}
+                  {exs.length > 5 && <span className="badge badge-gray">+{exs.length-5}</span>}
+                </div>
+                <div className="divider"/>
+                <div style={{display:'flex',gap:8}}>
+                  <button className="btn btn-primary btn-sm" style={{flex:1}} onClick={() => startWorkout(w)}>
+                    <Icon name="play" size={13}/>Iniciar
+                  </button>
+                  <button className="btn btn-secondary btn-sm btn-icon" onClick={() => openEdit(w)}><Icon name="edit" size={14}/></button>
+                  <button className="btn btn-danger btn-sm btn-icon" onClick={() => deleteWorkout(w.id)}><Icon name="trash" size={14}/></button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal" style={{maxWidth:640}}>
+            <div className="modal-title">{editing ? 'Editar Rutina' : 'Nueva Rutina'}</div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Nombre de la rutina *</label>
+                <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Ej: Empuje â Lunes"/>
+              </div>
+              <div className="form-group">
+                <label>DescripciÃ³n</label>
+                <input value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="Ej: Pecho, Hombros, TrÃ­ceps"/>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Color de la rutina</label>
+              <div style={{display:'flex',gap:8}}>
+                {COLORS.map(c => (
+                  <div key={c} onClick={() => setForm(f=>({...f,color:c}))}
+                    style={{width:28,height:28,borderRadius:'50%',background:c,cursor:'pointer',
+                      border: form.color===c ? '3px solid white' : '3px solid transparent', transition:'all 0.15s'}}/>
+                ))}
+              </div>
+            </div>
+
+            <div className="divider"/>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--text)',marginBottom:10}}>
+              Ejercicios seleccionados: <span style={{color:'var(--orange)'}}>{form.exercises.length}</span>
+            </div>
+
+            <div className="search-bar" style={{marginBottom:8}}>
+              <Icon name="search" size={14} color="var(--gray)"/>
+              <input value={exSearch} onChange={e=>setExSearch(e.target.value)} placeholder="Buscar ejercicio..."/>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:10}}>
+              {['Todos','Pecho','Espalda','Piernas','Hombros','BÃ­ceps','TrÃ­ceps','Core'].map(g => (
+                <span key={g} className={`muscle-pill ${exFilter===g?'active':''}`} onClick={() => setExFilter(g)}>{g}</span>
+              ))}
+            </div>
+
+            <div style={{maxHeight:260,overflowY:'auto',display:'flex',flexDirection:'column',gap:6,paddingRight:4}}>
+              {filtEx.map(e => (
+                <div key={e.id} className={`exercise-card ${form.exercises.includes(e.id)?'selected':''}`} onClick={() => toggleEx(e.id)}>
+                  <div className="exercise-icon" style={{width:34,height:34,fontSize:16}}>{e.icon}</div>
+                  <div className="exercise-info"><div className="exercise-name" style={{fontSize:13}}>{e.name}</div><div className="exercise-meta">{e.muscle}</div></div>
+                  {form.exercises.includes(e.id) && <Icon name="check" size={16} color="var(--orange)"/>}
+                </div>
+              ))}
+            </div>
+
+            <div className="divider"/>
+            <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+              <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancelar</button>
+              <button className="btn btn-primary" onClick={saveWorkout} disabled={!form.name.trim()}>
+                {editing ? 'Guardar cambios' : 'Crear rutina'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// âââ SESSION ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function Session({ activeWorkout, setActiveWorkout, setPage, onSessionEnd }) {
+  const [sets, setSets] = useState(() => {
+    if (!activeWorkout) return {};
+    const init = {};
+    activeWorkout.exercises.forEach(id => {
+      init[id] = [{ reps:'', weight:'', done:false }, { reps:'', weight:'', done:false }, { reps:'', weight:'', done:false }];
+    });
+    return init;
+  });
+  const [startTime] = useState(Date.now());
+  const [elapsed, setElapsed] = useState(0);
+  const [restTimer, setRestTimer] = useState(null);
+  const [restLeft, setRestLeft] = useState(0);
+  const [notes, setNotes] = useState('');
+  const [finishing, setFinishing] = useState(false);
+
+  useEffect(() => {
+    const t = setInterval(() => setElapsed(Date.now() - startTime), 1000);
+    return () => clearInterval(t);
+  }, [startTime]);
+
+  useEffect(() => {
+    if (restLeft > 0) {
+      const t = setTimeout(() => setRestLeft(r => r - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [restLeft]);
+
+  if (!activeWorkout) {
+    return (
+      <div className="page">
+        <div className="empty-state">
+          <div className="empty-state-icon">ðï¸</div>
+          <div className="empty-state-title">Sin sesiÃ³n activa</div>
+          <p>Ve a "Mis Rutinas" y elige una para comenzar.</p>
+          <button className="btn btn-primary" onClick={() => setPage('workouts')}>Ver Rutinas</button>
+        </div>
+      </div>
+    );
+  }
+
+  const exercises = activeWorkout.exercises.map(id => EXERCISES.find(e=>e.id===id)).filter(Boolean);
+
+  function updateSet(exId, setIdx, field, val) {
+    setSets(prev => ({
+      ...prev,
+      [exId]: prev[exId].map((s, i) => i===setIdx ? {...s, [field]: val} : s)
+    }));
+  }
+  function toggleDone(exId, setIdx) {
+    setSets(prev => {
+      const updated = { ...prev, [exId]: prev[exId].map((s,i) => i===setIdx ? {...s,done:!s.done} : s) };
+      if (!prev[exId][setIdx].done) { setRestLeft(90); }
+      return updated;
+    });
+  }
+  function addSet(exId) {
+    setSets(prev => ({ ...prev, [exId]: [...prev[exId], {reps:'',weight:'',done:false}] }));
+  }
+  function removeSet(exId) {
+    setSets(prev => ({ ...prev, [exId]: prev[exId].slice(0,-1) }));
+  }
+
+  const completedSets = Object.values(sets).flat().filter(s=>s.done).length;
+  const totalSets = Object.values(sets).flat().length;
+
+  function finishSession() {
+    let totalVol = 0;
+    Object.values(sets).forEach(exSets => {
+      exSets.filter(s=>s.done).forEach(s => {
+        totalVol += (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
+      });
+    });
+    const session = {
+      id: 'sess'+Date.now(),
+      date: new Date().toISOString(),
+      workoutName: activeWorkout.name,
+      duration: Date.now() - startTime,
+      exercises: exercises.map(e => ({
+        id: e.id, name: e.name,
+        sets: sets[e.id].filter(s=>s.done).map(s=>({reps:parseInt(s.reps)||0, weight:parseFloat(s.weight)||0}))
+      })),
+      totalVolume: Math.round(totalVol),
+      notes
+    };
+    onSessionEnd(session);
+    setActiveWorkout(null);
+    setPage('progress');
+  }
+
+  return (
+    <div style={{paddingTop:60}}>
+      <div className="timer-bar">
+        <div>
+          <div className="timer-label">SesiÃ³n activa â {activeWorkout.name}</div>
+          <div className="timer-text">{formatDuration(elapsed)}</div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          {restLeft > 0 && (
+            <div style={{background:'var(--orange-dim)',border:'1px solid var(--orange)',borderRadius:8,padding:'8px 14px',textAlign:'center'}}>
+              <div style={{fontSize:10,color:'var(--orange)',letterSpacing:1}}>DESCANSO</div>
+              <div style={{fontSize:20,fontWeight:800,color:'var(--orange)',fontVariantNumeric:'tabular-nums'}}>{restLeft}s</div>
+            </div>
+          )}
+          <div style={{textAlign:'center'}}>
+            <div style={{fontSize:12,color:'var(--gray)'}}>Series hechas</div>
+            <div style={{fontSize:20,fontWeight:800,color:'var(--white)'}}>{completedSets}/{totalSets}</div>
+          </div>
+          <button className="btn btn-success" onClick={() => setFinishing(true)}>Finalizar</button>
+        </div>
+      </div>
+
+      <div className="page" style={{paddingTop:20}}>
+        {exercises.map(ex => (
+          <div key={ex.id} className="session-exercise">
+            <div className="session-exercise-header">
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <span style={{fontSize:24}}>{ex.icon}</span>
+                <div>
+                  <div className="session-exercise-name">{ex.name}</div>
+                  <div style={{fontSize:12,color:'var(--gray)'}}>{ex.muscle} Â· {ex.equipment}</div>
+                </div>
+              </div>
+              <div style={{display:'flex',gap:6}}>
+                <button className="btn btn-xs btn-ghost" onClick={() => addSet(ex.id)}>+Serie</button>
+                {sets[ex.id]?.length > 1 && <button className="btn btn-xs btn-ghost" onClick={() => removeSet(ex.id)}>âSerie</button>}
+              </div>
+            </div>
+            <table className="sets-table">
+              <thead>
+                <tr>
+                  <th>Serie</th>
+                  <th>Peso (kg)</th>
+                  <th>Reps</th>
+                  <th>â</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sets[ex.id]?.map((s, i) => (
+                  <tr key={i} style={{opacity: s.done ? 0.6 : 1}}>
+                    <td><span className="set-number">#{i+1}</span></td>
+                    <td>
+                      <input type="number" className="set-input" value={s.weight}
+                        onChange={e=>updateSet(ex.id,i,'weight',e.target.value)}
+                        placeholder="0" min="0" step="0.5" disabled={s.done}/>
+                    </td>
+                    <td>
+                      <input type="number" className="set-input" value={s.reps}
+                        onChange={e=>updateSet(ex.id,i,'reps',e.target.value)}
+                        placeholder="0" min="0" disabled={s.done}/>
+                    </td>
+                    <td>
+                      <button className={`set-done ${s.done?'done':''}`} onClick={() => toggleDone(ex.id,i)}>
+                        {s.done ? 'â' : 'â'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+
+        <div className="form-group" style={{marginTop:8}}>
+          <label>Notas de la sesiÃ³n (opcional)</label>
+          <textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder="CÃ³mo te has sentido, observaciones..."/>
+        </div>
+      </div>
+
+      {finishing && (
+        <div className="modal-overlay">
+          <div className="modal" style={{maxWidth:420}}>
+            <div className="modal-title">Â¿Finalizar sesiÃ³n? ð¯</div>
+            <div style={{fontSize:14,color:'var(--text2)',marginBottom:16}}>
+              Has completado <strong style={{color:'var(--orange)'}}>{completedSets}</strong> series en <strong style={{color:'var(--white)'}}>{formatDuration(elapsed)}</strong>.
+            </div>
+            <div style={{background:'var(--card2)',borderRadius:10,padding:'12px 16px',marginBottom:20}}>
+              {exercises.map(e => {
+                const done = sets[e.id]?.filter(s=>s.done).length || 0;
+                return (
+                  <div key={e.id} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',fontSize:13}}>
+                    <span style={{color:'var(--text2)'}}>{e.name}</span>
+                    <span style={{color: done>0 ? 'var(--green)' : 'var(--gray)'}}>{done}/{sets[e.id]?.length} series</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button className="btn btn-ghost" style={{flex:1}} onClick={() => setFinishing(false)}>Continuar</button>
+              <button className="btn btn-primary" style={{flex:1}} onClick={finishSession}>Guardar sesiÃ³n</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// âââ PROGRESS âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function Progress({ history }) {
+  const [selEx, setSelEx] = useState(EXERCISES[0].id);
+  const ex = EXERCISES.find(e=>e.id===selEx);
+
+  // Volume over time (last 14 sessions)
+  const volData = history.slice(-14).map((h,i) => ({
+    name: new Date(h.date).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'}),
+    Volumen: h.totalVolume,
+  }));
+
+  // Sessions per muscle group
+  const muscleCount = {};
+  history.forEach(h => {
+    h.exercises?.forEach(e => {
+      const ex = EXERCISES.find(x=>x.id===e.id);
+      if (ex) muscleCount[ex.muscle] = (muscleCount[ex.muscle]||0)+1;
+    });
+  });
+  const muscleData = Object.entries(muscleCount).map(([muscle, count]) => ({muscle, count})).sort((a,b)=>b.count-a.count);
+
+  // PR tracking for selected exercise
+  const prData = history.flatMap(h => {
+    const found = h.exercises?.find(e=>e.id===selEx);
+    if (!found) return [];
+    const maxWeight = Math.max(...(found.sets||[]).map(s=>s.weight||0), 0);
+    return maxWeight > 0 ? [{ fecha: new Date(h.date).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'}), Peso: maxWeight }] : [];
+  });
+
+  const stats = [
+    { label:'Total sesiones', value: history.length, icon:'ð' },
+    { label:'Mejor racha', value: calcStreak(history)+' dÃ­as', icon:'ð¥' },
+    { label:'Sesiones este mes', value: history.filter(h => new Date(h.date).getMonth()===new Date().getMonth()).length, icon:'ð' },
+    { label:'Volumen medio', value: history.length ? Math.round(history.reduce((s,h)=>s+(h.totalVolume||0),0)/history.length)+'kg' : '0kg', icon:'âï¸' },
+  ];
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div className="page-title">Progreso & EstadÃ­sticas</div>
+        <div className="page-sub">Tu evoluciÃ³n a lo largo del tiempo</div>
+      </div>
+
+      <div className="stats-grid" style={{marginBottom:24}}>
+        {stats.map(s => (
+          <div key={s.label} className="stat-card">
+            <div style={{fontSize:24,marginBottom:6}}>{s.icon}</div>
+            <div className="stat-value" style={{fontSize:22}}>{s.value}</div>
+            <div className="stat-label">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="charts-grid">
+        <div className="chart-card">
+          <div className="card-title">Volumen por sesiÃ³n (kg)</div>
+          {volData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={volData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false}/>
+                <XAxis dataKey="name" tick={{fill:'#888',fontSize:11}} axisLine={false} tickLine={false}/>
+                <YAxis tick={{fill:'#888',fontSize:11}} axisLine={false} tickLine={false}/>
+                <Tooltip contentStyle={{background:'#1E1E1E',border:'1px solid #2A2A2A',borderRadius:8,color:'#fff'}}/>
+                <Line type="monotone" dataKey="Volumen" stroke="#F97316" strokeWidth={2.5} dot={{fill:'#F97316',r:4}} activeDot={{r:6}}/>
+              </LineChart>
+            </ResponsiveContainer>
+          ) : <div style={{color:'var(--gray)',textAlign:'center',padding:'40px 0',fontSize:13}}>Sin datos aÃºn. Â¡Completa tu primer entreno!</div>}
+        </div>
+
+        <div className="chart-card">
+          <div className="card-title">MÃºsculos mÃ¡s trabajados</div>
+          {muscleData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={muscleData.slice(0,6)} layout="vertical" barSize={14}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" horizontal={false}/>
+                <XAxis type="number" tick={{fill:'#888',fontSize:11}} axisLine={false} tickLine={false}/>
+                <YAxis dataKey="muscle" type="category" tick={{fill:'#aaa',fontSize:12}} axisLine={false} tickLine={false} width={70}/>
+                <Tooltip contentStyle={{background:'#1E1E1E',border:'1px solid #2A2A2A',borderRadius:8,color:'#fff'}}/>
+                <Bar dataKey="count" fill="#3B82F6" radius={[0,4,4,0]}/>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : <div style={{color:'var(--gray)',textAlign:'center',padding:'40px 0',fontSize:13}}>Sin datos aÃºn</div>}
+        </div>
+      </div>
+
+      <div className="chart-card" style={{marginTop:20}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <div className="card-title" style={{marginBottom:0}}>EvoluciÃ³n de peso â {ex?.name}</div>
+          <select style={{width:'auto'}} value={selEx} onChange={e=>setSelEx(e.target.value)}>
+            {EXERCISES.filter(e=>e.type==='Fuerza').map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+          </select>
+        </div>
+        {prData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={prData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false}/>
+              <XAxis dataKey="fecha" tick={{fill:'#888',fontSize:11}} axisLine={false} tickLine={false}/>
+              <YAxis tick={{fill:'#888',fontSize:11}} axisLine={false} tickLine={false}/>
+              <Tooltip contentStyle={{background:'#1E1E1E',border:'1px solid #2A2A2A',borderRadius:8,color:'#fff'}} formatter={v=>[v+'kg','Peso']}/>
+              <Line type="monotone" dataKey="Peso" stroke="#22C55E" strokeWidth={2.5} dot={{fill:'#22C55E',r:4}}/>
+            </LineChart>
+          </ResponsiveContainer>
+        ) : <div style={{color:'var(--gray)',textAlign:'center',padding:'40px 0',fontSize:13}}>Completa sesiones con este ejercicio para ver tu progreso</div>}
+      </div>
+
+      <div className="card" style={{marginTop:20}}>
+        <div className="card-title" style={{marginBottom:12}}>Historial completo</div>
+        {history.length === 0 ? (
+          <div style={{textAlign:'center',padding:'20px',color:'var(--gray)',fontSize:13}}>No hay sesiones registradas aÃºn</div>
+        ) : [...history].reverse().map(h => (
+          <div key={h.id} className="history-item">
+            <div>
+              <div style={{fontSize:11,color:'var(--orange)',fontWeight:600}}>{new Date(h.date).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</div>
+              <div style={{fontSize:14,fontWeight:700,color:'var(--text)',marginTop:2}}>{h.workoutName}</div>
+              <div style={{fontSize:12,color:'var(--gray)',marginTop:1}}>{h.exercises?.length} ejercicios Â· {formatDuration(h.duration)}</div>
+              {h.notes && <div style={{fontSize:12,color:'var(--text2)',marginTop:4,fontStyle:'italic'}}>"{h.notes}"</div>}
+            </div>
+            <div style={{marginLeft:'auto',textAlign:'right'}}>
+              <div style={{fontSize:20,fontWeight:800,color:'var(--orange)'}}>{h.totalVolume}kg</div>
+              <div style={{fontSize:11,color:'var(--gray)'}}>volumen</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// âââ UTILS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function formatDuration(ms) {
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const h = Math.floor(m/60);
+  if (h > 0) return `${h}h ${m%60}m`;
+  return `${m}:${String(s%60).padStart(2,'0')}`;
+}
+function calcStreak(history) {
+  if (!history.length) return 0;
+  const dates = [...new Set(history.map(h => new Date(h.date).toDateString()))].map(d=>new Date(d)).sort((a,b)=>b-a);
+  let streak = 0; let cur = new Date(); cur.setHours(0,0,0,0);
+  for (let d of dates) {
+    d.setHours(0,0,0,0);
+    const diff = Math.round((cur-d)/(1000*60*60*24));
+    if (diff <= 1) { streak++; cur = new Date(d); cur.setDate(cur.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+function getWeekData(history) {
+  const days = ['Dom','Lun','Mar','MiÃ©','Jue','Vie','SÃ¡b'];
+  const counts = {};
+  history.forEach(h => {
+    const d = new Date(h.date);
+    const now = new Date();
+    const diff = Math.round((now-d)/(1000*60*60*24));
+    if (diff < 7) {
+      const lbl = days[d.getDay()];
+      counts[lbl] = (counts[lbl]||0)+1;
+    }
+  });
+  return days.map(d => ({ day:d, sesiones: counts[d]||0 }));
+}
+
+// âââ APP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function App() {
+  const [page, setPage] = useState('dashboard');
+  const [workouts, setWorkouts] = useState(() => load('workouts', INITIAL_WORKOUTS));
+  const [history, setHistory] = useState(() => load('history', []));
+  const [activeWorkout, setActiveWorkout] = useState(null);
+
+  function onSessionEnd(session) {
+    const newHistory = [...history, session];
+    setHistory(newHistory);
+    save('history', newHistory);
+  }
+
+  const pages = {
+    dashboard: <Dashboard history={history} workouts={workouts} setPage={setPage}/>,
+    exercises: <Exercises/>,
+    workouts: <Workouts workouts={workouts} setWorkouts={setWorkouts} setPage={setPage} setActiveWorkout={setActiveWorkout}/>,
+    session: <Session activeWorkout={activeWorkout} setActiveWorkout={setActiveWorkout} setPage={setPage} onSessionEnd={onSessionEnd}/>,
+    progress: <Progress history={history}/>,
+  };
+
+  return (
+    <div className="layout">
+      <Sidebar page={page} setPage={setPage} activeSession={!!activeWorkout}/>
+      <div className="main">
+        {pages[page]}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
 </body>
 </html>
