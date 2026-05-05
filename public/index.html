@@ -6,6 +6,7 @@
   <title>APD SPORT — Plataforma de Entrenamiento</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <style>
@@ -379,7 +380,7 @@ const INITIAL_WORKOUTS = [
 
 // ─── STORAGE ──────────────────────────────────────────────────────────
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
-function save(key, val) { localStorage.setItem(key, JSON.stringify(val))8}
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val));}
 
 // ─── ICONS ──────────────────────────────────────────────────────────
 const Icon = ({ name, size=18, color='currentColor' }) => {
