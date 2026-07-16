@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "apd-client-agent",
-  "main": "src/index.ts",
+  "main": "src/entry.ts",
   "compatibility_date": "2026-07-16",
   "observability": { "enabled": true },
   "triggers": { "crons": ["7 * * * *"] },
@@ -15,6 +15,7 @@
     }
   ],
   "vars": {
+    "SYSTEM_ENABLED": "false",
     "DRY_RUN": "true",
     "GOOGLE_USER": "me",
     "GOOGLE_DRAFTS_FOLDER_ID": "1iwBrmrThuFcLEwwywSQhH7LDou_xSi-Y",
