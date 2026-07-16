@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "apd-client-agent",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-16",
+  "observability": {
+    "enabled": true
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "apd-client-agent",
+      "database_id": "3
