@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "apd-client-agent",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-16",
+  "observability": { "enabled": true },
+  "triggers": { "crons": ["7 * * * *"] },
+  "ai": { "binding": "AI" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "apd-client-agent",
+      "database_id": "3ab72da1-a102-4f90-a164-ede01e3a3b00",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "DRY_RUN": "true",
+    "GOOGLE_USER": "me",
+    "GOOGLE_DRAFTS_FOLDER_ID": "1iwBrmrThuFcLEwwywSQhH7LDou_xSi-Y",
+    "SLACK_CHANNEL_ID": "C0BGS1D8YJW",
+    "NOTION_DATA_SOURCE_ID": "5ae4e655-88ef-4758-86c3-f3e318f17296",
+    "NOTION_VERSION": "2025-09-03",
+    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+    "MAX_ITEMS_PER_RUN": "3",
+    "MAX_SOURCE_CHARS": "15000",
+    "LOOKBACK_MINUTES": "90",
+    "MAX_AI_CALLS_PER_DAY": "12"
+  }
+}
