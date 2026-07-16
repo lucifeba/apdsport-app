@@ -40,3 +40,5 @@ npm run deploy
 - `POST /slack/events`
 
 Consulta `MANUAL_OPERATIVO_CLOUDFLARE.md` antes de activar producción.
+
+Estado de despliegue: conexión Cloudflare Builds configurada.
