@@ -21,9 +21,20 @@ const json = (data: unknown, status = 200) =>
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 
+const safeEqual = (a: string, b: string) => {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+};
+
+const normalizeToken = (value: string | undefined) => (value ?? '').trim();
+
 const authorized = (request: Request, env: Env) => {
   const auth = request.headers.get('authorization') ?? '';
-  return Boolean(env.ADMIN_TOKEN && auth === `Bearer ${env.ADMIN_TOKEN}`);
+  const presented = normalizeToken(auth.replace(/^Bearer\s+/i, ''));
+  const expected = normalizeToken(env.ADMIN_TOKEN);
+  return Boolean(expected && presented && safeEqual(presented, expected));
 };
 
 async function health(env: Env) {
