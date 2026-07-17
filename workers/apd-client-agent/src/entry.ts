@@ -44,6 +44,12 @@ async function health(env: Env) {
     service: 'apd-client-agent',
     enabled: asBool(env.SYSTEM_ENABLED, false),
     dryRun: asBool(env.DRY_RUN, true),
+    runtimeSecrets: {
+      adminToken: Boolean(env.ADMIN_TOKEN),
+      googleClientId: Boolean(env.GOOGLE_CLIENT_ID),
+      googleClientSecret: Boolean(env.GOOGLE_CLIENT_SECRET),
+      googleRefreshToken: Boolean(env.GOOGLE_REFRESH_TOKEN),
+    },
     checkpoint: checkpoint?.value ?? null,
     latestRun,
     sourceCounts,
