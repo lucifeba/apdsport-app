@@ -15,14 +15,14 @@
     }
   ],
   "vars": {
-    "SYSTEM_ENABLED": "false",
+    "SYSTEM_ENABLED": "true",
     "DRY_RUN": "true",
     "GOOGLE_USER": "me",
     "GOOGLE_DRAFTS_FOLDER_ID": "1iwBrmrThuFcLEwwywSQhH7LDou_xSi-Y",
     "SLACK_CHANNEL_ID": "C0BGS1D8YJW",
     "NOTION_DATA_SOURCE_ID": "5ae4e655-88ef-4758-86c3-f3e318f17296",
     "NOTION_VERSION": "2025-09-03",
-    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct-fast",
     "MAX_ITEMS_PER_RUN": "3",
     "MAX_SOURCE_CHARS": "15000",
     "LOOKBACK_MINUTES": "90",
