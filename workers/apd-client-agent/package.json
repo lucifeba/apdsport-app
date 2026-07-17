@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx --yes wrangler@4.111.0 dev",
-    "deploy": "npx --yes wrangler@4.111.0 deploy",
+    "patch:production": "node scripts/patch-production.mjs",
+    "dev": "npm run patch:production && npx --yes wrangler@4.111.0 dev",
+    "deploy": "npm run patch:production && npx --yes wrangler@4.111.0 deploy",
     "db:migrate:local": "npx --yes wrangler@4.111.0 d1 migrations apply DB --local",
     "db:migrate:remote": "npx --yes wrangler@4.111.0 d1 migrations apply DB --remote",
-    "deploy:full": "npx --yes wrangler@4.111.0 d1 migrations apply DB --remote && npx --yes wrangler@4.111.0 deploy"
+    "deploy:full": "npm run patch:production && npx --yes wrangler@4.111.0 d1 migrations apply DB --remote && npx --yes wrangler@4.111.0 deploy"
   }
 }
