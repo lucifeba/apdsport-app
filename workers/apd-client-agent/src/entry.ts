@@ -1,9 +1,15 @@
 import app from './index';
+import { checkGoogle } from './google-check';
 
 interface Env {
   DB: D1Database;
   SYSTEM_ENABLED?: string;
   DRY_RUN?: string;
+  ADMIN_TOKEN?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  GOOGLE_REFRESH_TOKEN?: string;
+  GOOGLE_DRAFTS_FOLDER_ID?: string;
 }
 
 const asBool = (value: string | undefined, fallback = false) =>
@@ -14,6 +20,11 @@ const json = (data: unknown, status = 200) =>
     status,
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
+
+const authorized = (request: Request, env: Env) => {
+  const auth = request.headers.get('authorization') ?? '';
+  return Boolean(env.ADMIN_TOKEN && auth === `Bearer ${env.ADMIN_TOKEN}`);
+};
 
 async function health(env: Env) {
   const checkpoint = await env.DB.prepare(
@@ -53,6 +64,13 @@ export default {
 
     if (request.method === 'GET' && url.pathname === '/health') {
       return json(await health(env));
+    }
+
+    if (request.method === 'POST' && url.pathname === '/admin/check-google') {
+      if (!authorized(request, env)) {
+        return json({ ok: false, error: 'unauthorized' }, 401);
+      }
+      return json(await checkGoogle(env));
     }
 
     if (
