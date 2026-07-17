@@ -1,5 +1,7 @@
 import app from './index';
 import { checkGoogle } from './google-check';
+import { checkSlack } from './slack-check';
+import { checkNotion } from './notion-check';
 
 interface Env {
   DB: D1Database;
@@ -10,6 +12,11 @@ interface Env {
   GOOGLE_CLIENT_SECRET?: string;
   GOOGLE_REFRESH_TOKEN?: string;
   GOOGLE_DRAFTS_FOLDER_ID?: string;
+  SLACK_BOT_TOKEN?: string;
+  SLACK_CHANNEL_ID?: string;
+  NOTION_TOKEN?: string;
+  NOTION_DATA_SOURCE_ID?: string;
+  NOTION_VERSION?: string;
 }
 
 const asBool = (value: string | undefined, fallback = false) =>
@@ -60,6 +67,8 @@ async function health(env: Env) {
       googleClientId: Boolean(env.GOOGLE_CLIENT_ID),
       googleClientSecret: Boolean(env.GOOGLE_CLIENT_SECRET),
       googleRefreshToken: Boolean(env.GOOGLE_REFRESH_TOKEN),
+      slackBotToken: Boolean(env.SLACK_BOT_TOKEN),
+      notionToken: Boolean(env.NOTION_TOKEN),
     },
     checkpoint: checkpoint?.value ?? null,
     latestRun,
@@ -84,10 +93,18 @@ export default {
     }
 
     if (request.method === 'POST' && url.pathname === '/admin/check-google') {
-      if (!authorized(request, env)) {
-        return json({ ok: false, error: 'unauthorized' }, 401);
-      }
+      if (!authorized(request, env)) return json({ ok: false, error: 'unauthorized' }, 401);
       return json(await checkGoogle(env));
+    }
+
+    if (request.method === 'POST' && url.pathname === '/admin/check-slack') {
+      if (!authorized(request, env)) return json({ ok: false, error: 'unauthorized' }, 401);
+      return json(await checkSlack(env));
+    }
+
+    if (request.method === 'POST' && url.pathname === '/admin/check-notion') {
+      if (!authorized(request, env)) return json({ ok: false, error: 'unauthorized' }, 401);
+      return json(await checkNotion(env));
     }
 
     if (
