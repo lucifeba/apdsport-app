@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "patch:production": "node scripts/patch-production.mjs && node scripts/patch-config.mjs",
+    "patch:production": "node scripts/patch-production.mjs && node scripts/patch-config.mjs && node scripts/patch-entry.mjs",
     "dev": "npm run patch:production && npx --yes wrangler@4.111.0 dev",
     "deploy": "npm run patch:production && npx --yes wrangler@4.111.0 deploy",
     "db:migrate:local": "npx --yes wrangler@4.111.0 d1 migrations apply DB --local",
