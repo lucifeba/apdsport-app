@@ -1,17 +1,2 @@
-interface Env {
-  DB: D1Database;
-  AI: any;
-  DRY_RUN: string;
-  GOOGLE_USER: string;
-  GOOGLE_DRAFTS_FOLDER_ID: string;
-  GOOGLE_INBOX_FOLDER_ID?: string;
-  GMAIL_QUERY?: string;
-  SLACK_CHANNEL_ID: string;
-  SLACK_ALERT_CHANNEL_ID?: string;
-  NOTION_DATA_SOURCE_ID: string;
-  NOTION_VERSION: string;
-  AI_MODEL: string;
-  MAX_ITEMS_PER_RUN: string;
-  MAX_SOURCE_CHARS: string;
-  LOOKBACK_MINUTES: string;
-  MAX_AI
+import type{AgentEnv}from'./client-types';import{json,safe}from'./client-utils';import{run}from'./client-run';import{slackEvent}from'./client-events';
+export default{async scheduled(_c:ScheduledController,e:AgentEnv,ctx:ExecutionContext){ctx.waitUntil(run(e,'CRON').catch(console.error))},async fetch(r:Request,e:AgentEnv,ctx:ExecutionContext){const u=new URL(r.url);if(r.method==='POST'&&u.pathname==='/slack/events')return slackEvent(r,e);if(r.method==='POST'&&u.pathname==='/admin/run'){const a=(r.headers.get('authorization')||'').replace(/^Bearer\s+/i,'').trim(),x=(e.ADMIN_TOKEN||'').trim();if(!x||!safe(a,x))return json({ok:false,error:'unauthorized'},401);const p=run(e,'MANUAL');ctx.waitUntil(p);return json(await p)}return json({ok:true,service:'apd-client-agent',endpoints:['/health','/admin/run','/slack/events']})}};
