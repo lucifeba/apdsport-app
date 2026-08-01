@@ -1,0 +1,13 @@
+{
+  "name": "apd-client-agent-cloudflare",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes wrangler@4.111.0 dev",
+    "deploy": "npx --yes wrangler@4.111.0 deploy",
+    "db:migrate:local": "npx --yes wrangler@4.111.0 d1 migrations apply DB --local",
+    "db:migrate:remote": "npx --yes wrangler@4.111.0 d1 migrations apply DB --remote",
+    "deploy:full": "npx --yes wrangler@4.111.0 d1 migrations apply DB --remote && npx --yes wrangler@4.111.0 deploy"
+  }
+}
