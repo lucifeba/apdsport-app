@@ -1,214 +1,121 @@
-# Manual operativo — Agente Cliente APD en Cloudflare
+# Manual operativo — Agente Cliente APD simplificado
 
 ## Objetivo
 
-El sistema revisa material nuevo o modificado de clientes APD SPORT en Gmail y Google Drive, genera un borrador interno, prioriza los casos y registra el trabajo en Slack, Notion y D1. Nunca responde automáticamente al cliente.
+El sistema revisa material nuevo o modificado de clientes APD SPORT en Gmail y Google Drive, genera un borrador interno, prioriza el caso y guarda el estado técnico en D1. Nunca responde automáticamente al cliente.
 
 ## Arquitectura
 
 - Cloudflare Worker `apd-client-agent`.
 - Cron Trigger horario.
-- Binding `AI` para Workers AI.
-- Binding `DB` para D1.
-- Gmail, Drive, Docs y Sheets como fuentes.
-- Google Docs como destino de borradores.
-- Slack para revisión operativa.
-- Notion para dashboard.
+- Workers AI para análisis.
+- D1 para memoria, auditoría y deduplicación.
+- Gmail y Drive como fuentes controladas.
+- Google Docs como único destino de borradores.
 
-No utiliza VPS, Docker, n8n ni OpenAI API.
+Slack y Notion no forman parte de la arquitectura actual.
 
 ## Flujo de ejecución
 
 1. Lee el checkpoint de D1.
 2. Obtiene acceso temporal a Google mediante OAuth.
-3. Busca mensajes recientes en Gmail y archivos modificados en Drive.
-4. Filtra material relacionado con seguimiento, entrenamiento, nutrición, analíticas, lesión, competición o recuperación.
+3. Busca correos con la etiqueta `APD/Entrada Cliente`.
+4. Busca archivos dentro de la carpeta de entrada configurada.
 5. Extrae texto de Gmail, Google Docs, Google Sheets y archivos de texto compatibles.
-6. Calcula ID, versión y hash.
-7. Ignora una fuente si no ha cambiado.
+6. Filtra material relacionado con seguimiento, entrenamiento, nutrición, analíticas, lesión, competición o recuperación.
+7. Deduplica por ID, versión y hash.
 8. Genera una referencia anónima `CP-XXXXXXXX`.
-9. Recupera el seguimiento anterior de esa referencia.
+9. Recupera el seguimiento anterior asociado.
 10. Workers AI crea el análisis comparativo.
-11. El código ajusta la prioridad con reglas adicionales.
-12. En producción crea un borrador privado, una ficha en Slack y una entrada en Notion.
-13. Guarda el estado en D1.
+11. El código calcula prioridad ROJA, NARANJA o VERDE.
+12. Crea un borrador privado en Google Docs.
+13. Guarda resultado, enlace, prioridad, análisis y estado en D1.
 14. Solo avanza el checkpoint cuando la ejecución termina sin fallos.
 
-## Tablas D1
+## Entradas
 
-La migración crea:
+### Gmail
 
-- `checkpoints`
-- `runs`
-- `sources`
-- `decisions`
-- `daily_usage`
-- `event_receipts`
+Aplica la etiqueta:
 
-No crees tablas manualmente. Aplica la migración incluida en el repositorio.
+`APD/Entrada Cliente`
 
-## Secretos que debes añadir en Cloudflare
+Solo los mensajes con esa etiqueta entran en el flujo.
 
-En el Worker, entra en `Configuración → Variables y secretos` y añade como secretos cifrados:
+### Google Drive
 
-- credenciales OAuth de Google;
-- refresh token de Google;
-- token del bot de Slack;
-- secreto de firma de Slack;
-- token de la integración de Notion;
-- token administrativo interno.
+Mueve el archivo a la carpeta privada configurada como `GOOGLE_INBOX_FOLDER_ID`.
 
-No guardes estos valores en GitHub, Slack, Notion, Drive ni conversaciones.
+## Salidas
 
-## Google
+Cada caso genera:
 
-Activa estas APIs:
-
-- Gmail API
-- Google Drive API
-- Google Docs API
-- Google Sheets API
-
-Permisos mínimos:
-
-- lectura de Gmail;
-- lectura de Drive;
-- creación de archivos de la aplicación;
-- lectura de Sheets.
-
-El sistema no solicita permisos para enviar correo.
-
-## Slack
-
-Crea una app de Slack con permisos para:
-
-- publicar mensajes;
-- leer reacciones;
-- leer información básica del canal.
-
-Invita el bot a `#apd-produccion`.
-
-Configura el endpoint de eventos del Worker y suscribe el evento `reaction_added`.
-
-Reacciones interpretadas:
-
-- ✅ → APROBADO
-- 🔁 → REVISAR
-- ⏸ → POSPUESTO
-- ❌ → DESCARTADO
-
-La decisión se guarda en D1 y actualiza Notion.
-
-## Notion
-
-Crea una integración interna con permisos de insertar y actualizar contenido. Comparte con ella la base `APD — Producción Cliente`.
-
-Notion recibe solo metadatos anonimizados:
-
+- un Google Doc privado;
 - referencia anónima;
-- tipo de material;
-- estado;
+- resumen;
+- objetivo;
+- cambios desde el seguimiento anterior;
+- mejoras y empeoramientos;
+- banderas rojas;
+- preguntas pendientes;
+- hipótesis no diagnósticas;
+- propuestas de entrenamiento, nutrición, fueling y recuperación;
+- métricas;
+- puntos a revisar;
+- mensaje de respuesta propuesto;
 - prioridad y score;
-- origen y fechas;
-- puntos de revisión redactados;
-- enlace al borrador;
-- minutos ahorrados;
-- hash externo.
+- minutos estimados ahorrados.
 
-## Conectar GitHub con Cloudflare
+## Revisión humana
 
-Configura el Worker con:
+La carpeta de borradores de Google Drive es el centro de revisión. El documento no se envía automáticamente. Pablo revisa, corrige y decide qué hacer con el contenido.
 
-- repositorio: `lucifeba/apdsport-app`;
-- rama inicial: `codex/apd-client-agent-cloudflare`;
-- directorio raíz: `workers/apd-client-agent`;
-- comando de compilación y despliegue: `npm install && npm run deploy:full`.
+La nueva operativa con agentes GPT se diseñará sobre estos documentos, sin automatizaciones recurrentes y sin depender de Slack o Notion.
 
-Tras validar y fusionar, cambia la rama de producción a `main`.
+## Coste y límites
 
-## Prueba segura
+La configuración actual limita:
 
-### Fase 1 — simulación
+- tres materiales por ejecución;
+- doce llamadas de IA al día;
+- 15.000 caracteres por material;
+- solo material nuevo o modificado;
+- deduplicación por versión y hash.
 
-1. Mantén `DRY_RUN=true`.
-2. Despliega el Worker.
-3. Aplica la migración D1.
-4. Abre `/health`.
-5. Crea un Google Doc ficticio con `check-in` en el título.
-6. Ejecuta manualmente el Worker.
-7. Comprueba una fila en `runs` y otra `SIMULADO` en `sources`.
-8. Repite sin modificar: debe omitirse.
-9. Modifica el documento: debe reprocesarse.
+El Worker no consume créditos del workspace de ChatGPT.
 
-Con `DRY_RUN=true` se validan Google, D1 y Workers AI, pero no se crean Docs, Slack ni Notion.
+## Endpoints
 
-### Fase 2 — producción controlada
+- `GET /health`: estado básico.
+- `POST /admin/status`: diagnóstico protegido.
+- `POST /admin/run`: ejecución manual protegida.
+- `POST /admin/reset-checkpoint`: reinicio protegido del checkpoint.
+- `POST /admin/check-google`: comprobación protegida de Google.
 
-1. Cambia `DRY_RUN=false`.
-2. Despliega otra vez.
-3. Modifica el documento ficticio.
-4. Ejecuta manualmente.
-5. Verifica el Google Doc privado, la ficha de Slack, la entrada de Notion y una reacción.
-6. Elimina el material ficticio cuando termine la prueba.
+## Mantenimiento
 
-## Protección de coste cero
+### Semanal
 
-La configuración incluye:
+- revisar la carpeta de borradores;
+- comprobar `/health`;
+- revisar ejecuciones fallidas en Cloudflare Logs;
+- mover fuera de la carpeta de entrada los archivos ya tratados cuando proceda.
 
-- máximo tres materiales por ejecución;
-- máximo doce llamadas de IA al día;
-- máximo 15.000 caracteres por material;
-- solo fuentes nuevas o modificadas;
-- deduplicación por versión y hash;
-- sin OpenAI API;
-- sin VPS;
-- sin infraestructura adicional de pago.
+### Mensual
 
-Al alcanzar el límite diario, el sistema detiene nuevos análisis y los retoma más tarde.
+- revisar uso de Workers AI;
+- revisar D1;
+- comprobar permisos de las carpetas privadas;
+- confirmar que las automatizaciones recurrentes de ChatGPT siguen desactivadas.
 
-## Monitorización
+## Limitaciones
 
-El endpoint `/health` muestra:
-
-- checkpoint;
-- última ejecución;
-- modo simulación;
-- conteo por estado.
-
-Revisa además:
-
-- Worker → Observabilidad → Logs;
-- Worker → Métricas;
-- D1 → lecturas y escrituras;
-- Workers AI → uso diario.
-
-## Limitaciones actuales
-
-- Los PDF y las imágenes no pasan por OCR.
-- Los archivos no compatibles se marcan para revisión manual.
-- Ningún mensaje se envía automáticamente al cliente.
-
-## Checklist final
-
-- [x] Worker creado
-- [x] Binding AI
-- [x] Binding DB
-- [x] D1 creada
-- [x] Código Worker
-- [x] Migración D1
-- [x] Cron
-- [x] Receptor Slack
-- [x] Manual
-- [ ] Secretos de Google
-- [ ] Credenciales de Slack
-- [ ] Integración de Notion
-- [ ] Token administrativo
-- [ ] GitHub conectado al Worker
-- [ ] Migración remota aplicada
-- [ ] Prueba en simulación
-- [ ] Prueba controlada de producción
-- [ ] Automatización provisional de ChatGPT desactivada
+- PDF e imágenes no pasan por OCR.
+- Los formatos incompatibles se marcan para revisión manual.
+- No envía respuestas al cliente.
+- No existe ya aprobación mediante reacciones.
+- No existe dashboard de Notion asociado.
 
 ## Regla de oro
 
-El sistema prepara, compara, prioriza y registra. Pablo revisa y decide. Nunca diagnostica ni contacta con un cliente por sí solo.
+El sistema prepara, compara, prioriza y documenta. Pablo revisa y decide. Nunca diagnostica ni contacta con un cliente por sí solo.
